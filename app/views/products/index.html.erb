@@ -1,0 +1,67 @@
+<script>
+  $( document ).ready(function() {
+    let counter = Array(<%= @products.length %>).fill(1);
+
+    $("#product_input").val('');
+
+    <% @products.each_with_index do |product, index| %>
+      $("#counter_<%= index %>").html(counter[<%= index %>])
+    <% end %>
+
+    $(".add").click(function(e) {
+      counter[e.target.id]++;
+      $("#counter_" + e.target.id).html(counter[e.target.id]);
+    });
+    $(".minus").click(function(e) {
+      if(counter[e.target.id] >= 2 ){
+        counter[e.target.id]--;
+        $("#counter_" + e.target.id).html(counter[e.target.id]);
+        counter[e.target.id] = counter[e.target.id] - 1;
+      }
+      else{
+        $.ajax({
+          type: "DELETE",
+          url: "/products/" + e.target.name,
+          data: {},
+          success: function(result) {
+            console.log('Completed');
+          },
+          error: function(result) {
+            console.log('Error');
+          }
+        });
+      }
+    });
+  });
+</script>
+
+<input id="product_input">
+<button id="add_btn">Add Product</button>
+<div id="products">
+  <% @products.each_with_index do |product, index| %>
+    <div>
+      <span><%= product.title %></span>
+      <button class="add" id="<%= index %>">+</button>
+      <span id="counter_<%= index %>"></span>
+      <button class="minus" id="<%= index %>" name="<%= product.id %>">-</button>
+    </div>
+  <% end %>
+<div>
+
+<script>
+  $("#add_btn").click(() => {
+    $.ajax({
+      type: "POST",
+      url: "/products",
+      data: { 
+        title: $("#product_input").val(),
+      },
+      success: function(result) {
+        console.log('Completed');
+      },
+      error: function(result) {
+        console.log('Error');
+      }
+    });
+  })
+</script>
