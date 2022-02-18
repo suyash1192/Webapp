@@ -1,27 +1,33 @@
 <script>
-  $( document ).ready(function() {
-    let counter = Array(<%= @products.length %>).fill(1);
+  function updateProduct(product_id, action) {
+    $.ajax({
+      type: "PATCH",
+      url: "/products/" + product_id,
+      data: { task: action },
+      success: function(result) {
+        console.log($("#counter_" + product_id));
+        $("#counter_" + product_id).html(result.count);
+      },
+      error: function(result) {
+        console.log(result);
+      }
+    });
+  }
 
+  $( document ).ready(function() {
     $("#product_input").val('');
 
-    <% @products.each_with_index do |product, index| %>
-      $("#counter_<%= index %>").html(counter[<%= index %>])
-    <% end %>
-
     $(".add").click(function(e) {
-      counter[e.target.id]++;
-      $("#counter_" + e.target.id).html(counter[e.target.id]);
+      updateProduct(e.target.id, "add");
     });
     $(".minus").click(function(e) {
-      if(counter[e.target.id] >= 2 ){
-        counter[e.target.id]--;
-        $("#counter_" + e.target.id).html(counter[e.target.id]);
-        counter[e.target.id] = counter[e.target.id] - 1;
+      if($("#counter_" + e.target.id).html() > 1 ){
+        updateProduct(e.target.id, "remove");
       }
       else{
         $.ajax({
           type: "DELETE",
-          url: "/products/" + e.target.name,
+          url: "/products/" + e.target.id,
           data: {},
           success: function(result) {
             console.log('Completed');
@@ -41,9 +47,9 @@
   <% @products.each_with_index do |product, index| %>
     <div>
       <span><%= product.title %></span>
-      <button class="add" id="<%= index %>">+</button>
-      <span id="counter_<%= index %>"></span>
-      <button class="minus" id="<%= index %>" name="<%= product.id %>">-</button>
+      <button class="add" id="<%= product.id %>">+</button>
+      <span id="counter_<%= product.id %>"><%= product.count %></span>
+      <button class="minus" id="<%= product.id %>">-</button>
     </div>
   <% end %>
 <div>

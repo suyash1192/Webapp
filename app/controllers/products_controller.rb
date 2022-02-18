@@ -1,4 +1,6 @@
 class ProductsController < ApplicationController
+  before_action :verify_product, only: [:update]
+
   def index
     @products = Product.all
   end
@@ -13,6 +15,25 @@ class ProductsController < ApplicationController
     end
   end
 
+  def update
+    if params[:task] == "add"
+      count = @product.count + 1
+    elsif params[:task] == "remove"
+      count = @product.count - 1
+    else
+      render json: { 'error': 'Invalid Params' }, status: :unprocessable_entity
+      return
+    end
+
+    if @product.update(count: count)
+      respond_to do |format|
+        format.json  { render :json => @product }
+      end
+    else
+      render json: { 'error': 'Updation error' }, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     @product = Product.find_by(id: params[:id])
     if @product && @product.destroy
@@ -24,6 +45,14 @@ class ProductsController < ApplicationController
 
   private
     def product_params
-      params.permit(:title, :id)
+      params.permit(:title, :id, :task)
+    end
+
+    def verify_product
+      render json: { 'error': 'Product not found' } unless product
+    end
+
+    def product
+      @product ||= Product.find_by(id: product_params[:id])
     end
 end
