@@ -43,5 +43,26 @@ RSpec.describe ProductsController, :type => :controller do
       expect(response.content_type).to eq "application/json; charset=utf-8"
       expect(JSON.parse(response.body).length).to eq(1)
     end
+
+    it "on UPDATE product with valid params, it respond in json format" do
+      product = create(:product)
+      patch :update, params: {
+        id: product.id,
+        task: "add"
+      }, :format => :json   
+      expect(response.status).to eq(200)
+      expect(product.count).to eq(1)
+    end
+
+    it "on UPDATE product with invalid params, it respond in json format with errors" do
+      product = create(:product)
+      patch :update, params: {
+        id: product.id,
+      }, :format => :json   
+      byebug  
+      expect(response.status).to eq(422)
+      expect(response.content_type).to eq "application/json; charset=utf-8"
+      expect(JSON.parse(response.body).length).to eq(1)
+    end
   end
 end
