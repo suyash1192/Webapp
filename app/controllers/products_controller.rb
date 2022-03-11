@@ -1,15 +1,19 @@
 class ProductsController < ApplicationController
   before_action :verify_product, only: [:update]
+  skip_before_action :verify_authenticity_token
+
 
   def index
     @products = Product.all
+    render json: @products, status: :ok
   end
 
   def create
     @product = Product.new(product_params)
 
     if @product.save
-      redirect_to root_path
+      # redirect_to root_path
+      render json: @product, status: :ok 
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -24,11 +28,11 @@ class ProductsController < ApplicationController
       render json: { 'error': 'Invalid Params' }, status: :unprocessable_entity
       return
     end
-
     if @product.update(count: count)
-      respond_to do |format|
-        format.json  { render :json => @product }
-      end
+      # respond_to do |format|
+        # format.json  { render :json => @product }
+        render json: @product, status: :ok
+      # end
     else
       render json: { 'error': 'Updation error' }, status: :unprocessable_entity
     end
